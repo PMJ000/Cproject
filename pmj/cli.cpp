@@ -6,17 +6,14 @@
 #include <sys/socket.h>
 using namespace std;
 
-void error(char *message);
+void error(const char *message);
 
 int main(int argc, char* argv[])
 {
 	int sock;
-    int opmsg[1024];
+    char msg[1024];
     int result[4];
 	struct sockaddr_in serv_addr;
-	char message[30];
-	int str_len;
-    int number;
 	
 	if(argc!=3)
     {
@@ -37,19 +34,21 @@ int main(int argc, char* argv[])
 		error("connect() error!");
     else
 		puts("Connected...........");
-    
-    fputs("Your number : ", stdout);
-	cin>>number;
-    cout<<endl;
-	opmsg[0]=number;
-	
-	write(sock, opmsg, 1);
-	read(sock, result, 4);
+    while(1)
+	{
+		fputs("Your number : ", stdout);
+		cin>>msg;
+		if(msg[0] == 'q')
+			break;
+		write(sock,msg,1024);
+		read(sock,msg,1024);
+		cout<<msg<<endl;
+	}
 	close(sock);
 	return 0;
 }
 
-void error(char *message)
+void error(const char *message)
 {
 	fputs(message, stderr);
 	fputc('\n', stderr);

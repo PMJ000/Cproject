@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 using namespace std;
 
-void error(char *message);
+void error(const char * errormessage);
 
 int main(int argc, char *argv[])
 {
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_adr;
     struct sockaddr_in clnt_addr;
 	socklen_t clnt_addr_size;
-
+    char message[1024];
     if(argc != 2)
     {
         cout<<"Usage : "<<argv[0]<<"<port>"<<endl;
@@ -45,15 +45,22 @@ int main(int argc, char *argv[])
     {
 		error("accept() error");  
     }
-    write(clnt_sock, 0, sizeof(int));
+    while(1)
+    {
+        int str_len=read(clnt_sock,message, 1024);
+        if(str_len==-1)
+            error("read() error!");
+        cout<<message<<endl;
+        write(clnt_sock,message, 1024);
+    }
 	close(clnt_sock);	
 	close(serv_sock);
     return 0;
 }
 
-void error(char *message)
+void error(const char * errormessage)
 {
-	fputs(message, stderr);
+	fputs(errormessage, stderr);
 	fputc('\n', stderr);
 	exit(1);
 }
