@@ -10,21 +10,60 @@ class server
     private:
         int serv_sock;
         int clnt_sock;
+        int option;
+        socklen_t optlen;
         struct sockaddr_in serv_adr;
         struct sockaddr_in clnt_addr;
         socklen_t clnt_addr_size;
         char message[1024];
+        char number;
+        string book[10] = {" 도서"," 책"," 출판사"," 대여정보"," 기타"," 제목"," 작가"," 장르"," 기타"," 등"};
 
     public:
-        void input()
+        void login()
         {
             while(1)
             {
-                int str_len=read(clnt_sock,message, 1024);
+                number = '0';
+                int str_len=read(clnt_sock,(void *)&number,1);
                 if(str_len==-1)
                     error("read() error!");
-                cout<<message<<endl;
-                write(clnt_sock,message, 1024);
+                cout<<number;
+                if(number == '9')
+                {
+                    str_len=read(clnt_sock,message, 1024);
+                    if(str_len==-1)
+                        error("read() error!");
+                    cout<<"Your ID : "<<endl;
+                    cout<<message<<endl;
+                    write(clnt_sock,message, 1024);
+                }
+                else if(number == '8')
+                {
+                    str_len=read(clnt_sock,message, 1024);
+                    if(str_len==-1)
+                        error("read() error!");
+                    cout<<"Your PW : "<<endl;
+                    cout<<message<<endl;
+                    write(clnt_sock,message, 1024);
+                }
+                else if(number == '1')
+                {
+                    for(int i = 0 ; i < 10 ; i++)
+                    {
+                        int len = book[i].size();
+                        write(clnt_sock,&len,sizeof(len));
+                        write(clnt_sock,book[i].c_str(),len);
+                    }  
+                }
+                else if(number == '2')
+                {
+                    cout<<"미완성";
+                }
+                else if(number == 0)
+                {
+                    sleep(1);
+                }
             }
         }
         void create_socket(int * argc,char * argv[])
@@ -40,6 +79,10 @@ class server
             {
                 error("socket() error");
             }
+
+            optlen = sizeof(option);
+            option = 1;
+            setsockopt(serv_sock, SOL_SOCKET,SO_REUSEADDR,(void*)&option,optlen);
 
             memset(&serv_adr, 0, sizeof(serv_adr));
             serv_adr.sin_family=AF_INET;
@@ -75,7 +118,8 @@ int main(int argc, char *argv[])
 {
     server pmj;
     pmj.create_socket(&argc,argv);
-    pmj.input();
+    pmj.login();
+    cout<<"11";
     pmj.socket_close();
     return 0;
 }

@@ -10,10 +10,59 @@ class client
 	private:
 		int sock;
 		char msg[1024];
+		char msg_id[1024];
+		char msg_pw[1024];
+		char number;
 		int result[4];
 		struct sockaddr_in serv_addr;
+		string book[10];
 
 	public:
+		void book_inquiry()
+        {
+            fputs("도서 조회 : 1  장르별 검색 : 2 ", stdout);
+			cin>>number;
+			if(number == '1')
+			{
+				write(sock,(void *)&number,1);
+				for(int i = 0 ; i < 10 ; i++)
+				{
+					int len;
+					read(sock,&len,sizeof(len));
+					char *book = new char[len + 1]; 
+					read(sock,book,len);
+					book[len]= '\0';
+					cout<<book;
+					delete[] book;
+					
+				}
+			}
+			else if(number == 2)
+			{
+				write(sock,(void *)&number,1);
+				fputs("작가 : 1 , 장르 : 2 , 제목 : 3",stdout);
+				cin>>number;
+				if(number == 1)
+				{
+					write(sock,"작가",2);
+					read(sock,book,20);
+					cout<<book;
+				}
+				else if(number == 2)
+				{
+					write(sock,"장르",2);
+					read(sock,book,20);
+					cout<<book;
+				}
+				else if(number == 3)
+				{
+					write(sock,"제목",2);
+					read(sock,book,20);
+					cout<<book;
+				}
+
+			}
+        }
 		void create_socket(int * argc,char *argv[]) //소켓 생성 함수
 		{
 			if(*argc!=3)
@@ -41,18 +90,26 @@ class client
 			fputc('\n', stderr);
 			exit(1);
 		}
-		void input() // 서버로 문자 전송 함수
+		void login() // 서버로 문자 전송 함수
 		{
-			while(1)
-			{
-				fputs("Your number : ", stdout);
-				cin>>msg;
-				if(msg[0] == 'q')
-					break;
-				write(sock,msg,1024);
-				read(sock,msg,1024);
-				cout<<msg<<endl;
-			}
+			fputs("ID : ", stdout);
+			cin>>msg_id;
+			number = '9';
+			write(sock,(void *)&number,1);
+			write(sock,msg_id,1024);
+			read(sock,msg_id,1024);
+
+			fputs("PW : ", stdout);
+			cin>>msg_pw;
+			number = '8';
+			write(sock,(void *)&number,1);
+			write(sock,msg_pw,1024);
+			read(sock,msg_pw,1024);
+
+			fputs("Your ID : ", stdout);
+			cout<<msg_id<<endl;
+			fputs("Your PW : ", stdout);
+			cout<<msg_pw<<endl;
 		}
 		void client_close() //소켓 닫는 함수
 		{
@@ -63,7 +120,8 @@ int main(int argc, char* argv[])
 {
 	client pmj;
 	pmj.create_socket(&argc,argv);
-	pmj.input();
+	pmj.login();
+	pmj.book_inquiry();
 	pmj.client_close();
 	return 0;
 }
