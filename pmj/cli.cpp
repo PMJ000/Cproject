@@ -19,7 +19,7 @@ class client
 	public:
 		void book_inquiry()
         {
-            fputs("도서 조회 : 1  장르별 검색 : 2 ", stdout);
+            fputs("도서 조회 : 1  장르별 검색 : 2  = ", stdout);
 			cin>>number;
 			write(sock,(void *)&number,1);
 			if(number == '1')
@@ -37,7 +37,7 @@ class client
 			}
 			else if(number == '2')
 			{
-				fputs("작가 : 1 , 장르 : 2 , 제목 : 3",stdout);
+				fputs("작가 : 1 , 청구기호 : 2 , 제목 : 3 = ",stdout);
 				cin>>number;
 				write(sock,(void *)&number,1);
 				if(number == '1')
@@ -54,9 +54,30 @@ class client
 							char *book = new char[len + 1]; 
 							read(sock,book,len);
 							book[len]= '\0';
-							cout<<book<<endl;
+							cout<<book<<" ";
 							delete[] book;
 						}
+						cout<<endl;
+					}
+				}
+				else if(number == '2')
+				{
+					fputs("청구기호 명을 입력해주세요.",stdout);
+					cin>>msg;
+					write(sock,msg,1024);
+					for(int j = 0 ; j < 10 ; j++)
+					{
+						for(int i = 0 ; i < 10 ; i++)
+						{
+							int len;
+							read(sock,&len,sizeof(len));
+							char *book = new char[len + 1]; 
+							read(sock,book,len);
+							book[len]= '\0';
+							cout<<book<<" ";
+							delete[] book;
+						}
+						cout<<endl;
 					}
 				}
 				else if(number == '3')
@@ -74,7 +95,6 @@ class client
 						cout<<book<<endl;
 						delete[] book;
 					}
-					cout<<'1';
 				}
 
 			}

@@ -20,16 +20,16 @@ class database
                 sql::ResultSet *res = stmnt->executeQuery("select * from KING");
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
-                    std::cout << "NO = " << res->getString(1);
-                    std::cout << ",library = " << res->getString(2);
+                    std::cout << "SNB = " << res->getString(1);
+                    std::cout << ",Library = " << res->getString(2);
                     std::cout << ",dataroom = "<< res->getString(3);
-                    std::cout << ",SNB = "<< res->getString(4);
+                    std::cout << ",Registration_number = "<< res->getString(4);
                     std::cout << ",name = "<< res->getString(5);
-                    std::cout << ",author = "<< res->getString(6);
+                    std::cout << ",Author = "<< res->getString(6);
                     std::cout << ",publisher = "<< res->getString(7);
-                    std::cout << ",year = "<< res->getString(8);
-                    std::cout << ",find = "<< res->getString(9);
-                    std::cout << ",year2 = "<< res->getString(10);
+                    std::cout << ",Publication_year = "<< res->getString(8);
+                    std::cout << ",Call_number = "<< res->getString(9);
+                    std::cout << ",Data_base_date = "<< res->getString(10);
                     break;
                 }
             // 실패시 오류 메세지 반환
@@ -46,25 +46,25 @@ class database
                 std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
-                    std::cout << "NO = " << res->getString(1);
+                    std::cout << "SNB = " << res->getString(1);
                     book[0] = res->getString(1);
-                    std::cout << ",library = " << res->getString(2);
+                    std::cout << ",Library = " << res->getString(2);
                     book[1] = res->getString(2);
                     std::cout << ",dataroom = "<< res->getString(3);
                     book[2] = res->getString(3);
-                    std::cout << ",SNB = "<< res->getString(4);
+                    std::cout << ",Registration_number = "<< res->getString(4);
                     book[3] = res->getString(4);
                     std::cout << ",name = "<< res->getString(5);
                     book[4] = res->getString(5);
-                    std::cout << ",author = "<< res->getString(6);
+                    std::cout << ",Author = "<< res->getString(6);
                     book[5] = res->getString(6);
                     std::cout << ",publisher = "<< res->getString(7);
                     book[6] = res->getString(7);
-                    std::cout << ",year = "<< res->getString(8);
+                    std::cout << ",Publication_year = "<< res->getString(8);
                     book[7] = res->getString(8);
-                    std::cout << ",find = "<< res->getString(9);
+                    std::cout << ",Call_number = "<< res->getString(9);
                     book[8] = res->getString(9);
-                    std::cout << ",year2 = "<< res->getString(10);
+                    std::cout << ",Data_base_date = "<< res->getString(10);
                     book[9] = res->getString(10);
                     break;
                 }
@@ -73,34 +73,75 @@ class database
                 std::cerr << "Error selecting tasks: " << e.what() << std::endl;
             }
         }
-        void authorselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[],int  clnt_sock) 
+        void Authorselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[],int  clnt_sock) 
         {
             try {
-                int i = 0;
-                std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT * FROM KING where author like %?% limit 10 "));
-                stmnt->setString(1, userinput);
-                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+                std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
+                std::string str = "SELECT * FROM KING where author like '%" + userinput +"%'limit 10 ";
+                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery(str));
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
-                    std::cout << "NO = " << res->getString(1);
+                    std::cout << "SNB = " << res->getString(1);
                     book[0] = res->getString(1);
-                    std::cout << ",library = " << res->getString(2);
+                    std::cout << ",Library = " << res->getString(2);
                     book[1] = res->getString(2);
                     std::cout << ",dataroom = "<< res->getString(3);
                     book[2] = res->getString(3);
-                    std::cout << ",SNB = "<< res->getString(4);
+                    std::cout << ",Registration_number = "<< res->getString(4);
                     book[3] = res->getString(4);
                     std::cout << ",name = "<< res->getString(5);
                     book[4] = res->getString(5);
-                    std::cout << ",author = "<< res->getString(6);
+                    std::cout << ",Author = "<< res->getString(6);
                     book[5] = res->getString(6);
                     std::cout << ",publisher = "<< res->getString(7);
                     book[6] = res->getString(7);
-                    std::cout << ",year = "<< res->getString(8);
+                    std::cout << ",Publication_year = "<< res->getString(8);
                     book[7] = res->getString(8);
-                    std::cout << ",find = "<< res->getString(9);
+                    std::cout << ",Call_number = "<< res->getString(9);
                     book[8] = res->getString(9);
-                    std::cout << ",year2 = "<< res->getString(10);
+                    std::cout << ",Data_base_date = "<< res->getString(10)<<endl;
+                    book[9] = res->getString(10);
+                    for(int i = 0 ; i < 10 ; i++)
+                    {
+                        int len = book[i].size();
+                        write(clnt_sock,&len,sizeof(len));
+                        write(clnt_sock,book[i].c_str(),len);
+                    }  
+                }
+            // 실패시 오류 메세지 반환
+            } catch(sql::SQLException& e){
+                std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+            }
+        }
+        void Call_numberselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[],int  clnt_sock) 
+        {
+            try {
+                cout<<'a';
+                std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
+                std::string str = "SELECT * FROM KING where year like '%" + userinput +"%'limit 10 ";
+                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery(str));
+                // 반복문을 통해서 내부의 값을 반환
+                while (res->next()) {
+                    cout<<'a';
+                    std::cout << "SNB = " << res->getString(1);
+                    book[0] = res->getString(1);
+                    std::cout << ",Library = " << res->getString(2);
+                    book[1] = res->getString(2);
+                    std::cout << ",dataroom = "<< res->getString(3);
+                    book[2] = res->getString(3);
+                    std::cout << ",Registration_number = "<< res->getString(4);
+                    book[3] = res->getString(4);
+                    std::cout << ",name = "<< res->getString(5);
+                    book[4] = res->getString(5);
+                    std::cout << ",Author = "<< res->getString(6);
+                    book[5] = res->getString(6);
+                    std::cout << ",publisher = "<< res->getString(7);
+                    book[6] = res->getString(7);
+                    std::cout << ",Publication_year = "<< res->getString(8);
+                    book[7] = res->getString(8);
+                    std::cout << ",Call_number = "<< res->getString(9);
+                    book[8] = res->getString(9);
+                    std::cout << ",Data_base_date = "<< res->getString(10)<<endl;
                     book[9] = res->getString(10);
                     for(int i = 0 ; i < 10 ; i++)
                     {
@@ -175,11 +216,18 @@ class server
                 }
                 else if(number == '2')
                 {
+                    cout<<'a';
                     read(clnt_sock,(void *)&number,1);
                     if(number == '1')
                     {
                         read(clnt_sock,message, 1024);
-                        dbpmj.authorselect(conn,message,book,clnt_sock);
+                        dbpmj.Authorselect(conn,message,book,clnt_sock);
+                    }
+                    else if(number == '2')
+                    {
+                        cout<<'a';
+                        read(clnt_sock,message, 1024);
+                        dbpmj.Call_numberselect(conn,message,book,clnt_sock);
                     }
                     else if(number == '3')
                     {
@@ -192,7 +240,7 @@ class server
                 {
                     sleep(3);
                 }
-            cout<<"asd"<<endl;
+                cout<<'b';
             }
         }
         void create_socket(int * argc,char * argv[])
