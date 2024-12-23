@@ -6,44 +6,115 @@
 #include <sys/socket.h>
 #include <mariadb/conncpp.hpp>
 using namespace std;
-// class database
-// {
-//     private:
+class database
+{
+    private:
 
-//     public:
-//          // DB연결 객체 생성
-//         sql::Driver* driver = sql::mariadb::get_driver_instance();
-//         // 연결할 DB의 특정 IP, DB를 정의
-//         sql::SQLString url("jdbc:mariadb://localhost:3306/KINGSEO");
-//         // 연결할 DB를 사용할 유저를 정의
-//         sql::Properties properties({{"user", "PMJ"}, {"password", "1234"}});
-//         // 객체에 값을 통하여 연결을 시도
-//         std::unique_ptr<sql::Connection> conn(driver->connect(url, properties));
-//             void select(std::unique_ptr<sql::Connection> &conn) 
-//         {
-//             try {
-//                 // createStaemet 객체 생성
-//                 std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
-//                 // 쿼리를 실행
-//                 sql::ResultSet *res = stmnt->executeQuery("select * from KING");
-//                 // 반복문을 통해서 내부의 값을 반환
-//                 while (res->next()) {
-//                     std::cout << "NO = " << res->getString(1);
-//                     std::cout << ",library = " << res->getString(2);
-//                     std::cout << ",dataroom = "<< res->getString(3);
-//                     std::cout << ",SNB = "<< res->getString(4);
-//                     std::cout << ",name = "<< res->getString(5);
-//                     std::cout << ",author = "<< res->getString(6);
-//                     std::cout << ",publisher = "<< res->getString(7);
-//                     std::cout << ",find = "<< res->getString(8);
-//                     std::cout << ",year2 = "<< res->getString(9);
-//                 }
-//             // 실패시 오류 메세지 반환
-//             } catch(sql::SQLException& e){
-//                 std::cerr << "Error selecting tasks: " << e.what() << std::endl;
-//             }
-//         }
-// };
+    public:
+        void select(std::unique_ptr<sql::Connection> &conn) 
+        {
+            try {
+                // createStaemet 객체 생성
+                std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
+                // 쿼리를 실행
+                sql::ResultSet *res = stmnt->executeQuery("select * from KING");
+                // 반복문을 통해서 내부의 값을 반환
+                while (res->next()) {
+                    std::cout << "NO = " << res->getString(1);
+                    std::cout << ",library = " << res->getString(2);
+                    std::cout << ",dataroom = "<< res->getString(3);
+                    std::cout << ",SNB = "<< res->getString(4);
+                    std::cout << ",name = "<< res->getString(5);
+                    std::cout << ",author = "<< res->getString(6);
+                    std::cout << ",publisher = "<< res->getString(7);
+                    std::cout << ",year = "<< res->getString(8);
+                    std::cout << ",find = "<< res->getString(9);
+                    std::cout << ",year2 = "<< res->getString(10);
+                    break;
+                }
+            // 실패시 오류 메세지 반환
+            } catch(sql::SQLException& e){
+                std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+            }
+        }
+        void nameselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[]) 
+        {
+            try {
+                int i = 0;
+                std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT * FROM KING where name = ?"));
+                stmnt->setString(1, userinput);
+                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+                // 반복문을 통해서 내부의 값을 반환
+                while (res->next()) {
+                    std::cout << "NO = " << res->getString(1);
+                    book[0] = res->getString(1);
+                    std::cout << ",library = " << res->getString(2);
+                    book[1] = res->getString(2);
+                    std::cout << ",dataroom = "<< res->getString(3);
+                    book[2] = res->getString(3);
+                    std::cout << ",SNB = "<< res->getString(4);
+                    book[3] = res->getString(4);
+                    std::cout << ",name = "<< res->getString(5);
+                    book[4] = res->getString(5);
+                    std::cout << ",author = "<< res->getString(6);
+                    book[5] = res->getString(6);
+                    std::cout << ",publisher = "<< res->getString(7);
+                    book[6] = res->getString(7);
+                    std::cout << ",year = "<< res->getString(8);
+                    book[7] = res->getString(8);
+                    std::cout << ",find = "<< res->getString(9);
+                    book[8] = res->getString(9);
+                    std::cout << ",year2 = "<< res->getString(10);
+                    book[9] = res->getString(10);
+                    break;
+                }
+            // 실패시 오류 메세지 반환
+            } catch(sql::SQLException& e){
+                std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+            }
+        }
+        void authorselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[],int  clnt_sock) 
+        {
+            try {
+                int i = 0;
+                std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT * FROM KING where author like %?% limit 10 "));
+                stmnt->setString(1, userinput);
+                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+                // 반복문을 통해서 내부의 값을 반환
+                while (res->next()) {
+                    std::cout << "NO = " << res->getString(1);
+                    book[0] = res->getString(1);
+                    std::cout << ",library = " << res->getString(2);
+                    book[1] = res->getString(2);
+                    std::cout << ",dataroom = "<< res->getString(3);
+                    book[2] = res->getString(3);
+                    std::cout << ",SNB = "<< res->getString(4);
+                    book[3] = res->getString(4);
+                    std::cout << ",name = "<< res->getString(5);
+                    book[4] = res->getString(5);
+                    std::cout << ",author = "<< res->getString(6);
+                    book[5] = res->getString(6);
+                    std::cout << ",publisher = "<< res->getString(7);
+                    book[6] = res->getString(7);
+                    std::cout << ",year = "<< res->getString(8);
+                    book[7] = res->getString(8);
+                    std::cout << ",find = "<< res->getString(9);
+                    book[8] = res->getString(9);
+                    std::cout << ",year2 = "<< res->getString(10);
+                    book[9] = res->getString(10);
+                    for(int i = 0 ; i < 10 ; i++)
+                    {
+                        int len = book[i].size();
+                        write(clnt_sock,&len,sizeof(len));
+                        write(clnt_sock,book[i].c_str(),len);
+                    }  
+                }
+            // 실패시 오류 메세지 반환
+            } catch(sql::SQLException& e){
+                std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+            }
+        }
+};
 class server
 {
     private:
@@ -56,10 +127,18 @@ class server
         socklen_t clnt_addr_size;
         char message[1024];
         char number;
-        string book[10] = {"연변","소장도서관"," 자료실명"," 등록번호","도서명","저자","출판사"," 출판연도"," 청구기호","데이터기준일자"};
-
+        string book[10] = {"연변"," 소장도서관"," 자료실명"," 등록번호"," 도서명"," 저자"," 출판사"," 출판연도"," 청구기호"," 데이터기준일자"};
     public:
-        void login()
+        void input()
+        {
+            for(int i = 0 ; i < 10 ; i++)
+            {
+                int len = book[i].size();
+                write(clnt_sock,&len,sizeof(len));
+                write(clnt_sock,book[i].c_str(),len);
+            }  
+        }
+        void login(std::unique_ptr<sql::Connection> &conn,database dbpmj)
         {
             while(1)
             {
@@ -67,7 +146,6 @@ class server
                 int str_len=read(clnt_sock,(void *)&number,1);
                 if(str_len==-1)
                     error("read() error!");
-                cout<<number;
                 if(number == '9')
                 {
                     str_len=read(clnt_sock,message, 1024);
@@ -97,12 +175,24 @@ class server
                 }
                 else if(number == '2')
                 {
-                    cout<<"미완성";
+                    read(clnt_sock,(void *)&number,1);
+                    if(number == '1')
+                    {
+                        read(clnt_sock,message, 1024);
+                        dbpmj.authorselect(conn,message,book,clnt_sock);
+                    }
+                    else if(number == '3')
+                    {
+                        read(clnt_sock,message, 1024);
+                        dbpmj.nameselect(conn,message,book);
+                        input();
+                    }
                 }
                 else if(number == '0')
                 {
-                    sleep(1);
+                    sleep(3);
                 }
+            cout<<"asd"<<endl;
             }
         }
         void create_socket(int * argc,char * argv[])
@@ -155,10 +245,18 @@ class server
 };
 int main(int argc, char *argv[])
 {
+     // DB연결 객체 생성
+    sql::Driver* driver = sql::mariadb::get_driver_instance();
+    // 연결할 DB의 특정 IP, DB를 정의
+    sql::SQLString url("jdbc:mariadb://localhost:3306/KINGSEO");
+    // 연결할 DB를 사용할 유저를 정의
+    sql::Properties properties({{"user", "PMJ"}, {"password", "1234"}});
+    // 객체에 값을 통하여 연결을 시도
+    std::unique_ptr<sql::Connection> conn(driver->connect(url, properties));
     server pmj;
-    // database dbpmj;
+    database dbpmj;
     pmj.create_socket(&argc,argv);
-    pmj.login();
+    pmj.login(conn,dbpmj);
     pmj.socket_close();
     return 0;
 }

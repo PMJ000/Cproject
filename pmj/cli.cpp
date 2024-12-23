@@ -13,7 +13,6 @@ class client
 		char msg_id[1024];
 		char msg_pw[1024];
 		char number;
-		int result[4];
 		struct sockaddr_in serv_addr;
 		string book[10];
 
@@ -22,9 +21,9 @@ class client
         {
             fputs("도서 조회 : 1  장르별 검색 : 2 ", stdout);
 			cin>>number;
+			write(sock,(void *)&number,1);
 			if(number == '1')
 			{
-				write(sock,(void *)&number,1);
 				for(int i = 0 ; i < 10 ; i++)
 				{
 					int len;
@@ -34,31 +33,48 @@ class client
 					book[len]= '\0';
 					cout<<book;
 					delete[] book;
-					
 				}
 			}
-			else if(number == 2)
+			else if(number == '2')
 			{
-				write(sock,(void *)&number,1);
 				fputs("작가 : 1 , 장르 : 2 , 제목 : 3",stdout);
 				cin>>number;
-				if(number == 1)
+				write(sock,(void *)&number,1);
+				if(number == '1')
 				{
-					write(sock,"작가",2);
-					read(sock,book,20);
-					cout<<book;
+					fputs("작가 명을 입력해주세요.",stdout);
+					cin>>msg;
+					write(sock,msg,1024);
+					for(int j = 0 ; j < 10 ; j++)
+					{
+						for(int i = 0 ; i < 10 ; i++)
+						{
+							int len;
+							read(sock,&len,sizeof(len));
+							char *book = new char[len + 1]; 
+							read(sock,book,len);
+							book[len]= '\0';
+							cout<<book<<endl;
+							delete[] book;
+						}
+					}
 				}
-				else if(number == 2)
+				else if(number == '3')
 				{
-					write(sock,"장르",2);
-					read(sock,book,20);
-					cout<<book;
-				}
-				else if(number == 3)
-				{
-					write(sock,"제목",2);
-					read(sock,book,20);
-					cout<<book;
+					fputs("제목 명을 입력해주세요.",stdout);
+					cin>>msg;
+					write(sock,msg,1024);
+					for(int i = 0 ; i < 10 ; i++)
+					{
+						int len;
+						read(sock,&len,sizeof(len));
+						char *book = new char[len + 1]; 
+						read(sock,book,len);
+						book[len]= '\0';
+						cout<<book<<endl;
+						delete[] book;
+					}
+					cout<<'1';
 				}
 
 			}
