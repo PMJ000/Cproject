@@ -17,7 +17,7 @@ class client
 		char msg_pw[1024];
 		char number;
 		struct sockaddr_in serv_addr;
-		string book[10];
+		string book[15];
 
 	public:
 		
