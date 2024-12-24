@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+
+
+
 using namespace std;
 class client
 {
@@ -17,6 +20,7 @@ class client
 		string book[10];
 
 	public:
+		
 		void book_inquiry()
         {
             fputs("도서 조회 : 1  장르별 검색 : 2  = ", stdout);
