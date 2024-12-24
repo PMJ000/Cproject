@@ -1,4 +1,3 @@
-// Includes
 #include <iostream>
 #include <mariadb/conncpp.hpp>
 
@@ -15,7 +14,7 @@
 //     } catch(sql::SQLException& e){
 //       std::cerr << "Error deleting task: " << e.what() << std::endl;
 //    }
-// }///ASDASDASDA
+// }
 
 // UPDATE문 실행 함수(이름을 이용하여 성별을 바꿈)
 // void updateTask(std::unique_ptr<sql::Connection> &conn, std::string name, bool gender) {
@@ -38,7 +37,7 @@
 void addMember(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw, std::string name, std::string phone, std::string addr) {
     try {
         // PreparedStatement 객체 생성
-        std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("insert into Member values (?, ?, ?, ?, ?)"));
+        std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("insert into Member values (?, ?, ?, ?, ?, default)"));
         // 객체에 값을 전달
         stmnt->setString(1, id);
         stmnt->setString(2, pw);
@@ -99,32 +98,22 @@ std::string checkIDmember(std::unique_ptr<sql::Connection> &conn, std::string id
         return "";
     }
 }
-//int main() {
-//    try {
-//        // DB연결 객체 생성
-//        sql::Driver* driver = sql::mariadb::get_driver_instance();
-//        // 연결할 DB의 특정 IP, DB를 정의
-//        sql::SQLString url("jdbc:mariadb://localhost:3306/test");
-//        // 연결할 DB를 사용할 유저를 정의
-//        sql::Properties properties({{"user", "operator"}, {"password", "0000"}});
-//        // 객체에 값을 통하여 연결을 시도
-//        std::unique_ptr<sql::Connection> conn(driver->connect(url, properties));
-//
-//        showTasks(conn);
-//        addTask(conn, "Tom", 15, false);
-//        addTask(conn, "None", 0, false);
-//        updateTask(conn, "Tom", true);
-//        deleteTask(conn, "None");
-//        std::cout << "-------------------------------" << std::endl;
-//        showTasks(conn);
-//
-//
-//    // 연결 실패시 오류 발생
-//    } catch(sql::SQLException& e) {
-//        std::cerr << "Error Connecting to MariaDB Platform: " << e.what() << std::endl;
-//        // 프로그램 비정상 종료
-//        return 1;
-//    }
-//
-//    return 0;
-//}
+//로그인 아이디, 비번 비교
+int checkLogin(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw) {
+    try {
+        std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id , M_pw FROM Member WHERE M_id = ? and M_pw =?"));
+        stmnt->setString(1, id);
+        stmnt->setString(2, pw);
+
+        std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+        if (res->next()) {
+            return 1; //맞으면 로그인 성공
+        } else {
+            return 2; // 중복되지 않은 경우 빈 문자열 반환
+        }
+
+    } catch(sql::SQLException& e) {
+        std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+        return 3;
+    }
+}
