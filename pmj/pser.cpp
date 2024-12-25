@@ -46,26 +46,10 @@ class database
                 std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
-                    std::cout << "SNB = " << res->getString(1);
-                    book[0] = res->getString(1);
-                    std::cout << ",Library = " << res->getString(2);
-                    book[1] = res->getString(2);
-                    std::cout << ",dataroom = "<< res->getString(3);
-                    book[2] = res->getString(3);
-                    std::cout << ",Registration_number = "<< res->getString(4);
-                    book[3] = res->getString(4);
-                    std::cout << ",name = "<< res->getString(5);
-                    book[4] = res->getString(5);
-                    std::cout << ",Author = "<< res->getString(6);
-                    book[5] = res->getString(6);
-                    std::cout << ",publisher = "<< res->getString(7);
-                    book[6] = res->getString(7);
-                    std::cout << ",Publication_year = "<< res->getString(8);
-                    book[7] = res->getString(8);
-                    std::cout << ",Call_number = "<< res->getString(9);
-                    book[8] = res->getString(9);
-                    std::cout << ",Data_base_date = "<< res->getString(10);
-                    book[9] = res->getString(10);
+                    for(int i = 0 ; i < 10 ; i++)
+                    {
+                        book[i] = res->getString(i+1);
+                    }
                     break;
                 }
             // 실패시 오류 메세지 반환
@@ -81,28 +65,9 @@ class database
                 std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery(str));
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
-                    //std::cout << "SNB = " << res->getString(1);
-                    book[0] = res->getString(1);
-                    //std::cout << ",Library = " << res->getString(2);
-                    book[1] = res->getString(2);
-                    // std::cout << ",dataroom = "<< res->getString(3);
-                    book[2] = res->getString(3);
-                    //std::cout << ",Registration_number = "<< res->getString(4);
-                    book[3] = res->getString(4);
-                    //std::cout << ",name = "<< res->getString(5);
-                    book[4] = res->getString(5);
-                    //std::cout << ",Author = "<< res->getString(6);
-                    book[5] = res->getString(6);
-                    //std::cout << ",publisher = "<< res->getString(7);
-                    book[6] = res->getString(7);
-                    //std::cout << ",Publication_year = "<< res->getString(8);
-                    book[7] = res->getString(8);
-                    //std::cout << ",Call_number = "<< res->getString(9);
-                    book[8] = res->getString(9);
-                   // std::cout << ",Data_base_date = "<< res->getString(10)<<endl;
-                    book[9] = res->getString(10);
                     for(int i = 0 ; i < 10 ; i++)
                     {
+                        book[i] = res->getString(i+1);
                         int len = book[i].size();
                         write(clnt_sock,&len,sizeof(len));
                         write(clnt_sock,book[i].c_str(),len);
@@ -124,28 +89,9 @@ class database
                 std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery(str));
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
-                    std::cout << "SNB = " << res->getString(1);
-                    book[0] = res->getString(1);
-                    std::cout << ",Library = " << res->getString(2);
-                    book[1] = res->getString(2);
-                    std::cout << ",dataroom = "<< res->getString(3);
-                    book[2] = res->getString(3);
-                    std::cout << ",Registration_number = "<< res->getString(4);
-                    book[3] = res->getString(4);
-                    std::cout << ",name = "<< res->getString(5);
-                    book[4] = res->getString(5);
-                    std::cout << ",Author = "<< res->getString(6);
-                    book[5] = res->getString(6);
-                    std::cout << ",publisher = "<< res->getString(7);
-                    book[6] = res->getString(7);
-                    std::cout << ",Publication_year = "<< res->getString(8);
-                    book[7] = res->getString(8);
-                    std::cout << ",Call_number = "<< res->getString(9);
-                    book[8] = res->getString(9);
-                    std::cout << ",Data_base_date = "<< res->getString(10)<<endl;
-                    book[9] = res->getString(10);
                     for(int i = 0 ; i < 10 ; i++)
                     {
+                        book[i] = res->getString(i+1);
                         int len = book[i].size();
                         write(clnt_sock,&len,sizeof(len));
                         write(clnt_sock,book[i].c_str(),len);
@@ -193,15 +139,10 @@ class server
                     str_len=read(clnt_sock,message, 1024);
                     if(str_len==-1)
                         error("read() error!");
-                    cout<<"Your ID : "<<endl;
-                    cout<<message<<endl;
                     write(clnt_sock,message, 1024);
-                    cout<<'0';
                     str_len=read(clnt_sock,message, 1024);
                     if(str_len==-1)
                         error("read() error!");
-                    cout<<"Your PW : "<<endl;
-                    cout<<message<<endl;
                     write(clnt_sock,message, 1024);
                 }
                 else if(number == '1')

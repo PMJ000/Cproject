@@ -25,6 +25,11 @@ class client
         {
             fputs("도서 조회 : 1  장르별 검색 : 2  = ", stdout);
 			cin>>number;
+			if(number >= 1 && number <= 2)
+			{
+				fputs("다시 입력해 주세요 도서 조회 : 1  장르별 검색 : 2  = ", stdout);
+				cin>>number;
+			}
 			write(sock,(void *)&number,1);
 			if(number == '1')
 			{
@@ -43,6 +48,11 @@ class client
 			{
 				fputs("작가 : 1 , 청구기호 : 2 , 제목 : 3 = ",stdout);
 				cin>>number;
+				if(number >= 1 && number <= 3)
+				{
+					fputs("다시 입력해 주세요 작가 : 1 , 청구기호 : 2 , 제목 : 3 = ", stdout);
+					cin>>number;
+				}
 				write(sock,(void *)&number,1);
 				if(number == '1')
 				{
