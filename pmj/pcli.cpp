@@ -312,64 +312,93 @@ class client
 			}
 			if(number == '1')
 			{
+				system("clear");
 				while(1)
 				{
 					fputs("ID : ", stdout);
 					cin>>msg_id;
 					fputs("PW : ", stdout);
 					cin>>msg_pw;
-					number = '9';
+					while(1)
+					{
+						fputs("로그인 하기 1 ,돌아가기 2 ",stdout);
+						cin>>number;
+						if(number < '1' || number > '2')
+						{
+							system("clear");
+							fputs("다시 입력해 주세요", stdout);
+							cout<<endl;
+						}
+						else
+							break;
+					}
+					if(number == '1')
+					{
+						number = '9';
+						write(sock,(void *)&number,1);
+
+						write(sock,msg_id,1024);
+						write(sock,msg_pw,1024);
+
+
+						read(sock,(void *)&number,1);
+						if(number == '2')
+						{	
+							system("clear");
+							fputs("다시 입력해주세요",stdout);
+							cout<<endl;
+						}
+						else if(number == '1')
+						{
+							break;
+						}
+					}
+					else if(number == '2')
+					{
+						system("clear");
+						login();
+						break;
+					}
+				}
+			}
+			else if(number == '2')
+			{
+				while(1)
+				{
+					char name[1024];
+					char phone[1024];
+					char addr[1024];
+					fputs("ID : ", stdout);
+					cin>>msg_id;
+					fputs("PW : ", stdout);
+					cin>>msg_pw;
+					fputs("name : ", stdout);
+					cin>>name;
+					fputs("phone : ", stdout);
+					cin>>phone;
+					fputs("addr : ", stdout);
+					cin>>addr;
+					number = '8';
 					write(sock,(void *)&number,1);
 
 					write(sock,msg_id,1024);
 					write(sock,msg_pw,1024);
-
-
+					write(sock,name,1024);
+					write(sock,phone,1024);
+					write(sock,addr,1024);
 					read(sock,(void *)&number,1);
-					if(number == '2')
-					{	
-						system("clear");
-						fputs("다시 입력해주세요",stdout);
-						cout<<endl;
-					}
-					else if(number == '1')
+					if(number == '1')
 					{
+						fputs("회원가입이 완료되었습니다.",stdout);
+						cout<<endl;
+						sleep(3);
 						break;
 					}
+					fputs("중복된 아이디입니다 다시 입력해주세요",stdout);
+					cout<<endl;
+					sleep(3);
+					system("clear");
 				}
-				read(sock,msg_id,1024);
-				read(sock,msg_pw,1024);
-
-				fputs("Your ID : ", stdout);
-				cout<<msg_id<<endl;
-				fputs("Your PW : ", stdout);
-				cout<<msg_pw<<endl;
-				sleep(3);
-			}
-			else if(number == '2')
-			{
-				char name[1024];
-                char phone[1024];
-                char addr[1024];
-				fputs("ID : ", stdout);
-				cin>>msg_id;
-				fputs("PW : ", stdout);
-				cin>>msg_pw;
-				fputs("name : ", stdout);
-				cin>>name;
-				fputs("phone : ", stdout);
-				cin>>phone;
-				fputs("addr : ", stdout);
-				cin>>addr;
-				number = '8';
-				write(sock,(void *)&number,1);
-
-				write(sock,msg_id,1024);
-				write(sock,msg_pw,1024);
-				write(sock,name,1024);
-				write(sock,phone,1024);
-				write(sock,addr,1024);
-				sleep(3);
 			}
 		}
 		void client_close() //소켓 닫는 함수

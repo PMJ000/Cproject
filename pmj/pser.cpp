@@ -48,24 +48,23 @@ class database
             }
         }
 		//회원가입 id 중복 체크 함수
+		// std::string checkIDmember(std::unique_ptr<sql::Connection> &conn, std::string id) {
+		// 	try {
+		// 		std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id FROM Member WHERE M_id = ?"));
+		// 		stmnt->setString(1, id);
 
-		std::string checkIDmember(std::unique_ptr<sql::Connection> &conn, std::string id) {
-			try {
-				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id FROM Member WHERE M_id = ?"));
-				stmnt->setString(1, id);
+		// 		std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+		// 		if (res->next()) {
+		// 			return std::string(res->getString("M_id")); // 변환 추가
+		// 		} else {
+		// 			return ""; // 중복되지 않은 경우 빈 문자열 반환
+		// 		}
 
-				std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
-				if (res->next()) {
-					return std::string(res->getString("M_id")); // 변환 추가
-				} else {
-					return ""; // 중복되지 않은 경우 빈 문자열 반환
-				}
-
-			} catch(sql::SQLException& e) {
-				std::cerr << "Error selecting tasks: " << e.what() << std::endl;
-				return "";
-			}
-		}
+		// 	} catch(sql::SQLException& e) {
+		// 		std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+		// 		return "";
+		// 	}
+		// }
 		//로그인 아이디 비교
 		int checkLoginId(std::unique_ptr<sql::Connection> &conn, std::string id) {
 			try {
@@ -104,32 +103,32 @@ class database
 				return 3;
 			}
 		}
-        void select(std::unique_ptr<sql::Connection> &conn) 
-        {
-            try {
-                // createStaemet 객체 생성
-                std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
-                // 쿼리를 실행
-                sql::ResultSet *res = stmnt->executeQuery("select * from KING");
-                // 반복문을 통해서 내부의 값을 반환
-                while (res->next()) {
-                    std::cout << "SNB = " << res->getString(1);
-                    std::cout << ",Library = " << res->getString(2);
-                    std::cout << ",dataroom = "<< res->getString(3);
-                    std::cout << ",Registration_number = "<< res->getString(4);
-                    std::cout << ",name = "<< res->getString(5);
-                    std::cout << ",Author = "<< res->getString(6);
-                    std::cout << ",publisher = "<< res->getString(7);
-                    std::cout << ",Publication_year = "<< res->getString(8);
-                    std::cout << ",Call_number = "<< res->getString(9);
-                    std::cout << ",Data_base_date = "<< res->getString(10);
-                    break;
-                }
-            // 실패시 오류 메세지 반환
-            } catch(sql::SQLException& e){
-                std::cerr << "Error selecting tasks: " << e.what() << std::endl;
-            }
-        }
+        // void select(std::unique_ptr<sql::Connection> &conn) 
+        // {
+        //     try {
+        //         // createStaemet 객체 생성
+        //         std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
+        //         // 쿼리를 실행
+        //         sql::ResultSet *res = stmnt->executeQuery("select * from KING");
+        //         // 반복문을 통해서 내부의 값을 반환
+        //         while (res->next()) {
+        //             std::cout << "SNB = " << res->getString(1);
+        //             std::cout << ",Library = " << res->getString(2);
+        //             std::cout << ",dataroom = "<< res->getString(3);
+        //             std::cout << ",Registration_number = "<< res->getString(4);
+        //             std::cout << ",name = "<< res->getString(5);
+        //             std::cout << ",Author = "<< res->getString(6);
+        //             std::cout << ",publisher = "<< res->getString(7);
+        //             std::cout << ",Publication_year = "<< res->getString(8);
+        //             std::cout << ",Call_number = "<< res->getString(9);
+        //             std::cout << ",Data_base_date = "<< res->getString(10);
+        //             break;
+        //         }
+        //     // 실패시 오류 메세지 반환
+        //     } catch(sql::SQLException& e){
+        //         std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+        //     }
+        // }
         void nameselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[],int  clnt_sock,int number) 
         {
             try {
@@ -257,8 +256,6 @@ class server
                             write(clnt_sock,(void *)&number, 1);
                         }
                     }
-                    write(clnt_sock,id, 1024);
-                    write(clnt_sock,pw, 1024);
                 }
                 else if(number == '8')
                 {
@@ -276,7 +273,18 @@ class server
                         str_len=read(clnt_sock,addr, 1024);
                         if(str_len==-1)
                             error("read() error!");
-                        dbpmj.addMember(conn,id,pw,name,phone,addr);
+                        int loginid = dbpmj.checkLoginId(conn, id);
+                        if(loginid == 1)
+                        {
+                            number = '9';
+                            write(clnt_sock,(void *)&number, 1);
+                        }
+                        else
+                        {
+                            number = '1';
+                            write(clnt_sock,(void *)&number, 1);
+                            dbpmj.addMember(conn,id,pw,name,phone,addr);
+                        }
                     }
                 }
                 else if(number == '1')
