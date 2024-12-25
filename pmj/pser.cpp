@@ -11,6 +11,99 @@ class database
     private:
 
     public:
+        void addMember(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw, std::string name, std::string phone, std::string addr) {
+			try {
+				// PreparedStatement 객체 생성
+				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("insert into Member values (?, ?, ?, ?, ?, default)"));
+				// 객체에 값을 전달
+				stmnt->setString(1, id);
+				stmnt->setString(2, pw);
+				stmnt->setString(3, name);
+				stmnt->setString(4, phone);
+				stmnt->setString(5, addr);
+				// 객체의 내부 함수를 이용하여 쿼리를 실행
+				stmnt->executeUpdate();
+			// 실패시 오류 메세지 반환
+			} catch(sql::SQLException& e){
+			std::cerr << "Error inserting new Member: " << e.what() << std::endl;
+			}
+		}
+        //로그인 아이디, 비번 비교
+        int checkLogin(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw) {
+            try {
+                std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id , M_pw FROM Member WHERE M_id = ? and M_pw =?"));
+                stmnt->setString(1, id);
+                stmnt->setString(2, pw);
+
+                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+                if (res->next()) {
+                    return 1; //맞으면 로그인 성공
+                } else {
+                    return 2; // 중복되지 않은 경우 빈 문자열 반환
+                }
+
+            } catch(sql::SQLException& e) {
+                std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+                return 3;
+            }
+        }
+		//회원가입 id 중복 체크 함수
+
+		std::string checkIDmember(std::unique_ptr<sql::Connection> &conn, std::string id) {
+			try {
+				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id FROM Member WHERE M_id = ?"));
+				stmnt->setString(1, id);
+
+				std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+				if (res->next()) {
+					return std::string(res->getString("M_id")); // 변환 추가
+				} else {
+					return ""; // 중복되지 않은 경우 빈 문자열 반환
+				}
+
+			} catch(sql::SQLException& e) {
+				std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+				return "";
+			}
+		}
+		//로그인 아이디 비교
+		int checkLoginId(std::unique_ptr<sql::Connection> &conn, std::string id) {
+			try {
+                cout<<id;
+				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id FROM Member WHERE M_id = ?"));
+				stmnt->setString(1, id);
+
+				std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+				if (res->next()) {
+					return 1; //맞으면 로그인 성공
+				} else {
+					return 2; // 중복되지 않은 경우 빈 문자열 반환
+				}
+
+			} catch(sql::SQLException& e) {
+				std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+				return 3;
+			}
+		}
+        //로그인 비번 비교
+		int checkLoginPw(std::unique_ptr<sql::Connection> &conn, std::string pw) {
+			try {
+                cout<<pw;
+				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT  M_pw FROM Member WHERE  M_pw = ?"));
+				stmnt->setString(1, pw);
+
+				std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+				if (res->next()) {
+					return 1; //맞으면 로그인 성공
+				} else {
+					return 2; // 중복되지 않은 경우 빈 문자열 반환
+				}
+
+			} catch(sql::SQLException& e) {
+				std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+				return 3;
+			}
+		}
         void select(std::unique_ptr<sql::Connection> &conn) 
         {
             try {
@@ -37,21 +130,24 @@ class database
                 std::cerr << "Error selecting tasks: " << e.what() << std::endl;
             }
         }
-        void nameselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[]) 
+        void nameselect(std::unique_ptr<sql::Connection> &conn,string userinput,string book[],int  clnt_sock,int number) 
         {
             try {
-                int i = 0;
-                std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT * FROM KING where name = ?"));
-                stmnt->setString(1, userinput);
-                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
+                std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
+                std::string str = "SELECT * FROM KING where name like '%" + userinput +"%'limit 10 offset "+ std::to_string(number);
+                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery(str));
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
                     for(int i = 0 ; i < 10 ; i++)
                     {
                         book[i] = res->getString(i+1);
+                        int len = book[i].size();
+                        write(clnt_sock,&len,sizeof(len));
+                        write(clnt_sock,book[i].c_str(),len);
                     }
-                    break;
                 }
+                
+
             // 실패시 오류 메세지 반환
             } catch(sql::SQLException& e){
                 std::cerr << "Error selecting tasks: " << e.what() << std::endl;
@@ -136,14 +232,52 @@ class server
                     error("read() error!");
                 if(number == '9')
                 {
-                    str_len=read(clnt_sock,message, 1024);
-                    if(str_len==-1)
-                        error("read() error!");
-                    write(clnt_sock,message, 1024);
-                    str_len=read(clnt_sock,message, 1024);
-                    if(str_len==-1)
-                        error("read() error!");
-                    write(clnt_sock,message, 1024);
+                    char id[1024];
+                    char pw[1024];
+                    while(1)
+                    {
+                        str_len=read(clnt_sock,id, 1024);
+                        str_len=read(clnt_sock,pw, 1024);
+                        if(str_len==-1)
+                            error("read() error!");
+                        int loginid = dbpmj.checkLoginId(conn, id);
+                        int loginpw = dbpmj.checkLoginPw(conn, pw);
+                        int login = dbpmj.checkLogin(conn,id, pw);
+                        if (loginid == 1 && loginpw == 1 && login == 1) 
+                        {
+                            cout<<"로그인 성공!";
+                            number = '1';
+                            write(clnt_sock,(void *)&number, 1);
+                            break;
+                        } 
+                        else 
+                        {
+                            cout<<"다시 입력해주세요";
+                            number = '2';
+                            write(clnt_sock,(void *)&number, 1);
+                        }
+                    }
+                    write(clnt_sock,id, 1024);
+                    write(clnt_sock,pw, 1024);
+                }
+                else if(number == '8')
+                {
+                    char id[1024];
+                    char pw[1024];
+                    char name[1024];
+                    char phone[1024];
+                    char addr[1024];
+                    while(1)
+                    {
+                        str_len=read(clnt_sock,id, 1024);
+                        str_len=read(clnt_sock,pw, 1024);
+                        str_len=read(clnt_sock,name, 1024);
+                        str_len=read(clnt_sock,phone, 1024);
+                        str_len=read(clnt_sock,addr, 1024);
+                        if(str_len==-1)
+                            error("read() error!");
+                        dbpmj.addMember(conn,id,pw,name,phone,addr);
+                    }
                 }
                 else if(number == '1')
                 {
@@ -186,8 +320,15 @@ class server
                     else if(number == '3')
                     {
                         read(clnt_sock,message, 1024);
-                        dbpmj.nameselect(conn,message,book);
-                        input();
+                        while(1)
+                        {
+                            read(clnt_sock,(void *)&number,1);
+                            if(number == -1)
+                            {
+                                break;
+                            }
+                            dbpmj.nameselect(conn,message,book,clnt_sock,number);
+                        }
                     }
                 }
                 else if(number == '0')
