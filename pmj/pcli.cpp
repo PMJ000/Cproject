@@ -14,6 +14,7 @@ class client
 		char msg_pw[1024];
 		char user_msg[1024];
 		char number;
+		char user = '1';
 		struct sockaddr_in serv_addr;
 		string book[10];
 
@@ -47,37 +48,42 @@ class client
 				system("clear");
 				while(1)
 				{
-					fputs("도서 기본 정보 보기 : 1  장르별 검색 : 2  = ", stdout);
+					fputs("도서 검색 : 1  도서 대여 : 2  도서 반납 : 3= ", stdout);
 					cin>>number;
-					if(number < '1' || number > '2')
+					if(number < '1' || number > '3')
 					{
 						system("clear");
 						fputs("다시 입력해 주세요", stdout);
 						cout<<endl;
+					}
+					else if(user == '0' && (number == '2' || number == '3'))
+					{
+						system("clear");
+						cout<<"비회원은 이용할수 없는 기능입니다."<<endl;
 					}
 					else
 						break;
 				}
 				write(sock,(void *)&number,1);
 				cout<<endl;
+				// if(number == '1')
+				// {
+				// 	system("clear");
+				// 	for(int i = 0 ; i < 10 ; i++)
+				// 	{
+				// 		int len;
+				// 		read(sock,&len,sizeof(len));
+				// 		char *book = new char[len + 1]; 
+				// 		read(sock,book,len);
+				// 		book[len]= '\0';
+				// 		cout<<book;
+				// 		delete[] book;
+				// 	}
+				// 	cout<<endl;
+				// 	fputs("끝내기  아무버튼",stdout);
+				// 	cin>>user_msg;
+				// }
 				if(number == '1')
-				{
-					system("clear");
-					for(int i = 0 ; i < 10 ; i++)
-					{
-						int len;
-						read(sock,&len,sizeof(len));
-						char *book = new char[len + 1]; 
-						read(sock,book,len);
-						book[len]= '\0';
-						cout<<book;
-						delete[] book;
-					}
-					cout<<endl;
-					fputs("끝내기  아무버튼",stdout);
-					cin>>user_msg;
-				}
-				else if(number == '2')
 				{
 					system("clear");
 					while(1)
@@ -265,6 +271,62 @@ class client
 					}
 
 				}
+				else if(number == '2')
+				{
+					read(sock,(void *)&number,1);
+					if(number == '1')
+					{
+						cout<<"블랙회원은 대여가 불가능합니다."<<endl;
+						sleep(1);
+					}
+					else if (number =='0')
+					{
+						cout<<"대여할 도서의 번호를 입력해주세요."<<endl;
+						cin>>msg;
+						write(sock,msg,1024);
+						read(sock,(void *)&number,1);
+						if(number == '1')
+						{
+							cout<<"책이 없습니다 대여가 불가능합니다!"<<endl;
+							sleep(2);				
+						}
+						else if(number == '0')
+						{
+							cout<<"대여가 가능합니다 대여 1 대여하지않음 2"<<endl;
+							cin>>number;
+							write(sock,(void *)&number,1);
+						}
+					}
+				}
+				else if(number == '3')
+				{
+					cout<<"반납할 도서의 번호를 입력해주세요."<<endl;
+					cin>>msg;
+					write(sock,msg,1024);
+					read(sock,(void *)&number,1);
+					if(number == '1')
+					{
+						cout<<"반닙이 가능합니다! 반납하기 1 "<<endl;	
+						cin>>number;
+						write(sock,(void *)&number,1);
+						read(sock,(void *)&number,1);
+						if(number == '1')
+						{
+							cout<<"반납이 완료되었습니다."<<endl;
+							sleep(2);
+						}
+						else if(number == '0')
+						{
+							cout<<"반납을 실패하였습니다."<<endl;
+							sleep(2);
+						}		
+					}
+					else if(number == '0')
+					{
+						cout<<"반납이 불가능합니다."<<endl;
+					}
+
+				}
 			}
         }
 		void create_socket(int * argc,char *argv[]) //소켓 생성 함수
@@ -299,9 +361,10 @@ class client
 			
 			while(1)
 			{
-				fputs("로그인 1번 회원가입 2번 = ",stdout);
+				user = '1';
+				fputs("로그인 1번 회원가입 2번 비회원 접속 3번 = ",stdout);
 				cin>>number;
-				if(number < '1' || number > '2')
+				if(number < '1' || number > '3')
 				{
 					system("clear");
 					fputs("다시 입력해 주세요", stdout);
@@ -378,27 +441,53 @@ class client
 					cin>>phone;
 					fputs("addr : ", stdout);
 					cin>>addr;
-					number = '8';
-					write(sock,(void *)&number,1);
-
-					write(sock,msg_id,1024);
-					write(sock,msg_pw,1024);
-					write(sock,name,1024);
-					write(sock,phone,1024);
-					write(sock,addr,1024);
-					read(sock,(void *)&number,1);
+					while(1)
+					{
+						fputs("회원가입 하기 1 ,돌아가기 2 ",stdout);
+						cin>>number;
+						if(number < '1' || number > '2')
+						{
+							system("clear");
+							fputs("다시 입력해 주세요", stdout);
+							cout<<endl;
+						}
+						else
+							break;
+					}
 					if(number == '1')
 					{
-						fputs("회원가입이 완료되었습니다.",stdout);
+						number = '8';
+						write(sock,(void *)&number,1);
+
+						write(sock,msg_id,1024);
+						write(sock,msg_pw,1024);
+						write(sock,name,1024);
+						write(sock,phone,1024);
+						write(sock,addr,1024);
+						read(sock,(void *)&number,1);
+						if(number == '9')
+						{
+							fputs("회원가입이 완료되었습니다.",stdout);
+							cout<<endl;
+							sleep(3);
+							break;
+						}
+						fputs("중복된 아이디입니다 다시 입력해주세요",stdout);
 						cout<<endl;
 						sleep(3);
+						system("clear");
+					}
+					else if(number == '2')
+					{
+						system("clear");
+						login();
 						break;
 					}
-					fputs("중복된 아이디입니다 다시 입력해주세요",stdout);
-					cout<<endl;
-					sleep(3);
-					system("clear");
 				}
+			}
+			else if(number == '3')
+			{
+				user = '0';
 			}
 		}
 		void client_close() //소켓 닫는 함수
