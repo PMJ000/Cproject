@@ -66,23 +66,6 @@ class client
 				}
 				write(sock,(void *)&number,1);
 				cout<<endl;
-				// if(number == '1')
-				// {
-				// 	system("clear");
-				// 	for(int i = 0 ; i < 10 ; i++)
-				// 	{
-				// 		int len;
-				// 		read(sock,&len,sizeof(len));
-				// 		char *book = new char[len + 1]; 
-				// 		read(sock,book,len);
-				// 		book[len]= '\0';
-				// 		cout<<book;
-				// 		delete[] book;
-				// 	}
-				// 	cout<<endl;
-				// 	fputs("끝내기  아무버튼",stdout);
-				// 	cin>>user_msg;
-				// }
 				if(number == '1')
 				{
 					system("clear");
@@ -324,6 +307,7 @@ class client
 					else if(number == '0')
 					{
 						cout<<"반납이 불가능합니다."<<endl;
+						sleep(2);
 					}
 
 				}
@@ -358,7 +342,7 @@ class client
 		}
 		void login() // 서버로 문자 전송 함수
 		{
-			
+			system("clear");
 			while(1)
 			{
 				user = '1';

@@ -11,7 +11,8 @@ class database
     private:
 
     public:
-        void addMember(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw, std::string name, std::string phone, std::string addr) {
+        void addMember(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw, std::string name, std::string phone, std::string addr)  
+        {
 			try {
 				// PreparedStatement 객체 생성
 				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("insert into Member values (?, ?, ?, ?, ?, default,'1','0','0',NULL)"));
@@ -28,7 +29,8 @@ class database
 			std::cerr << "Error inserting new Member: " << e.what() << std::endl;
 			}
 		}
-        int checkLogin(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw) {
+        int checkLogin(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw) 
+        {
             try {
                 std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id , M_pw FROM Member WHERE M_id = ? and M_pw =?"));
                 stmnt->setString(1, id);
@@ -46,7 +48,8 @@ class database
                 return 3;
             }
         }
-		int checkLoginId(std::unique_ptr<sql::Connection> &conn, std::string id) {
+		int checkLoginId(std::unique_ptr<sql::Connection> &conn, std::string id) 
+        {
 			try {
 				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id FROM Member WHERE M_id = ?"));
 				stmnt->setString(1, id);
@@ -452,7 +455,7 @@ class server
                 write(clnt_sock,book[i].c_str(),len);
             }  
         }
-        void login(std::unique_ptr<sql::Connection> &conn,database dbpmj)
+        void login(std::unique_ptr<sql::Connection> &conn,database date_class)
         {
             while(1)
             {
@@ -469,9 +472,9 @@ class server
                         str_len=read(clnt_sock,pw, 1024);
                         if(str_len==-1)
                             error("read() error!");
-                        int loginid = dbpmj.checkLoginId(conn, id);
-                        int loginpw = dbpmj.checkLoginPw(conn, pw);
-                        int login = dbpmj.checkLogin(conn,id, pw);
+                        int loginid = date_class.checkLoginId(conn, id);
+                        int loginpw = date_class.checkLoginPw(conn, pw);
+                        int login = date_class.checkLogin(conn,id, pw);
                         if (loginid == 1 && loginpw == 1 && login == 1) 
                         {
                             number = '1';
@@ -500,7 +503,7 @@ class server
                         str_len=read(clnt_sock,addr, 1024);
                         if(str_len==-1)
                             error("read() error!");
-                        int loginid = dbpmj.checkLoginId(conn, id);
+                        int loginid = date_class.checkLoginId(conn, id);
                         if(loginid == 1)
                         {
                             number = '1';
@@ -510,7 +513,7 @@ class server
                         {
                             number = '9';
                             write(clnt_sock,(void *)&number, 1);
-                            dbpmj.addMember(conn,id,pw,name,phone,addr);
+                            date_class.addMember(conn,id,pw,name,phone,addr);
                         }
                     }
                 }
@@ -536,7 +539,7 @@ class server
                             {
                                 break;
                             }
-                            dbpmj.Authorselect(conn,message,book,clnt_sock,number);
+                            date_class.Authorselect(conn,message,book,clnt_sock,number);
                         }
                     }
                     else if(number == '2')
@@ -549,7 +552,7 @@ class server
                             {
                                 break;
                             }
-                            dbpmj.Call_numberselect(conn,message,book,clnt_sock,number);
+                            date_class.Call_numberselect(conn,message,book,clnt_sock,number);
                         }
                     }
                     else if(number == '3')
@@ -562,13 +565,13 @@ class server
                             {
                                 break;
                             }
-                            dbpmj.nameselect(conn,message,book,clnt_sock,number);
+                            date_class.nameselect(conn,message,book,clnt_sock,number);
                         }
                     }
                 }
                 else if(number == '2')
                 {
-                    int num = dbpmj.rating(conn,id);
+                    int num = date_class.rating(conn,id);
                     if(num == 0)
                     {
                         number = '1';
@@ -579,7 +582,7 @@ class server
                         number = '0';
                         write(clnt_sock,(void *)&number, 1);
                         read(clnt_sock,message, 1024);
-                        if(dbpmj.borrowcheck(conn,message))
+                        if(date_class.borrowcheck(conn,message))
                         {
                             number ='1';
                             write(clnt_sock,(void *)&number, 1);
@@ -591,7 +594,7 @@ class server
                             read(clnt_sock,(void *)&number,1);
                             if(number == '1')
                             {
-                                dbpmj.borrowBook(conn,id,message);
+                                date_class.borrowBook(conn,id,message);
                             }
                         }
                     }
@@ -599,48 +602,48 @@ class server
                 else if(number == '3')
                 {
                     read(clnt_sock,message, 1024);
-                    if(dbpmj.borrowcheck(conn,message))
+                    if(date_class.borrowcheck(conn,message))
                     {
                         number ='1';
                         write(clnt_sock,(void *)&number, 1);
                         read(clnt_sock,(void *)&number,1);
                         if(number == '1')
                         {
-                            int date =dbpmj.Date_comparison(conn,id,message);
-                            int bools = dbpmj.returnBook(conn,id,message);
+                            int date =date_class.Date_comparison(conn,id,message);
+                            int bools = date_class.returnBook(conn,id,message);
                             if(bools == 1)
                             {
                                 number ='1';
                                 write(clnt_sock,(void *)&number, 1);
-                                int num = dbpmj.rating(conn,id);
+                                int num = date_class.rating(conn,id);
                                 if(num <= 1)
                                 {
                                     if(date <= 4)
                                     {
-                                        dbpmj.updatenormal(conn,id);
+                                        date_class.updatenormal(conn,id);
                                     }
                                     else if (date > 14)
                                     {
-                                        dbpmj.Black_member(conn,id);
+                                        date_class.Black_member(conn,id);
                                     }
                                     else if (date > 4)
                                     {
-                                        dbpmj.updateabnormal(conn,id);
+                                        date_class.updateabnormal(conn,id);
                                     }
                                 }
                                 else if(num == 2)
                                 {
                                     if(date <= 7)
                                     {
-                                        dbpmj.updatenormal(conn,id);
+                                        date_class.updatenormal(conn,id);
                                     }
                                     else if (date > 14)
                                     {
-                                        dbpmj.Black_member(conn,id);
+                                        date_class.Black_member(conn,id);
                                     }
                                     else if (date > 7)
                                     {
-                                        dbpmj.updateabnormal(conn,id);
+                                        date_class.updateabnormal(conn,id);
                                     }
 
                                 }
@@ -667,26 +670,26 @@ class server
                 {
                     sleep(3);
                 }
-                Membership_renewal(conn,dbpmj);
+                Membership_renewal(conn,date_class);
             }
         }
-        void Membership_renewal(std::unique_ptr<sql::Connection> &conn,database dbpmj)
+        void Membership_renewal(std::unique_ptr<sql::Connection> &conn,database date_class)
         {
-            int Subscription = dbpmj.Subscription_period(conn,id);
-            int normal_return = dbpmj.Normal_return(conn,id);
+            int Subscription = date_class.Subscription_period(conn,id);
+            int normal_return = date_class.Normal_return(conn,id);
             if(Subscription >= 180 && normal_return >= 10)
             {
-                dbpmj.Excellent_member(conn,id);
+                date_class.Excellent_member(conn,id);
             }
-            int abnormal_return = dbpmj.abnormal_return(conn,id);
+            int abnormal_return = date_class.abnormal_return(conn,id);
             if(abnormal_return >= 3)
             {
-                dbpmj.Black_member(conn,id);
-                dbpmj.black_date(conn,id);
+                date_class.Black_member(conn,id);
+                date_class.black_date(conn,id);
             }
-            if(dbpmj.changemember(conn,id))
+            if(date_class.changemember(conn,id))
             {
-                dbpmj.normal_member(conn,id);
+                date_class.normal_member(conn,id);
             }
         }
         void create_socket(int * argc,char * argv[])
@@ -743,10 +746,10 @@ int main(int argc, char *argv[])
     sql::SQLString url("jdbc:mariadb://localhost:3306/KINGSEO");
     sql::Properties properties({{"user", "PMJ"}, {"password", "1234"}});
     std::unique_ptr<sql::Connection> conn(driver->connect(url, properties));
-    server pmj;
-    database dbpmj;
-    pmj.create_socket(&argc,argv);
-    pmj.login(conn,dbpmj);
-    pmj.socket_close();
+    server server_class;
+    database date_class;
+    server_class.create_socket(&argc,argv);
+    server_class.login(conn,date_class);
+    server_class.socket_close();
     return 0;
 }
