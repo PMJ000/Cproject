@@ -278,6 +278,7 @@ class database
             } catch(sql::SQLException& e){
                 std::cerr << "Error selecting tasks: " << e.what() << std::endl;
             }
+            updateabnormalzero(conn,id);
         }
         void normal_member(std::unique_ptr<sql::Connection> &conn,std::string id) 
         {
@@ -316,6 +317,22 @@ class database
             try {
                 std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
                 std::string str = "update Member set M_abnormal_return = M_abnoraml_return + 1 where M_id = '"+id+"'";
+                std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery(str));
+                // 반복문을 통해서 내부의 값을 반환
+                while (res->next()) {
+                    
+                }
+            
+            // 실패시 오류 메세지 반환
+            } catch(sql::SQLException& e){
+                std::cerr << "Error selecting tasks: " << e.what() << std::endl;
+            }
+        }
+        void updateabnormalzero(std::unique_ptr<sql::Connection> &conn,std::string id) 
+        {
+            try {
+                std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
+                std::string str = "update Member set M_abnormal_return = 0 where M_id = '"+id+"'";
                 std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery(str));
                 // 반복문을 통해서 내부의 값을 반환
                 while (res->next()) {
@@ -652,6 +669,10 @@ class server
                                     {
                                         dbpmj.updatenormal(conn,id);
                                     }
+                                    else if (date > 14)
+                                    {
+                                        dbpmj.Black_member(conn,id);
+                                    }
                                     else if (date > 4)
                                     {
                                         dbpmj.updateabnormal(conn,id);
@@ -662,6 +683,10 @@ class server
                                     if(date <= 7)
                                     {
                                         dbpmj.updatenormal(conn,id);
+                                    }
+                                    else if (date > 14)
+                                    {
+                                        dbpmj.Black_member(conn,id);
                                     }
                                     else if (date > 7)
                                     {
