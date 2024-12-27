@@ -28,7 +28,6 @@ class database
 			std::cerr << "Error inserting new Member: " << e.what() << std::endl;
 			}
 		}
-        //로그인 아이디, 비번 비교
         int checkLogin(std::unique_ptr<sql::Connection> &conn, std::string id, std::string pw) {
             try {
                 std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id , M_pw FROM Member WHERE M_id = ? and M_pw =?"));
@@ -47,25 +46,6 @@ class database
                 return 3;
             }
         }
-		//회원가입 id 중복 체크 함수
-		// std::string checkIDmember(std::unique_ptr<sql::Connection> &conn, std::string id) {
-		// 	try {
-		// 		std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id FROM Member WHERE M_id = ?"));
-		// 		stmnt->setString(1, id);
-
-		// 		std::unique_ptr<sql::ResultSet> res(stmnt->executeQuery());
-		// 		if (res->next()) {
-		// 			return std::string(res->getString("M_id")); // 변환 추가
-		// 		} else {
-		// 			return ""; // 중복되지 않은 경우 빈 문자열 반환
-		// 		}
-
-		// 	} catch(sql::SQLException& e) {
-		// 		std::cerr << "Error selecting tasks: " << e.what() << std::endl;
-		// 		return "";
-		// 	}
-		// }
-		//로그인 아이디 비교
 		int checkLoginId(std::unique_ptr<sql::Connection> &conn, std::string id) {
 			try {
 				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT M_id FROM Member WHERE M_id = ?"));
@@ -83,7 +63,6 @@ class database
 				return 3;
 			}
 		}
-        //로그인 비번 비교
 		int checkLoginPw(std::unique_ptr<sql::Connection> &conn, std::string pw) {
 			try {
 				std::unique_ptr<sql::PreparedStatement> stmnt(conn->prepareStatement("SELECT  M_pw FROM Member WHERE  M_pw = ?"));
@@ -101,32 +80,6 @@ class database
 				return 3;
 			}
 		}
-        // void select(std::unique_ptr<sql::Connection> &conn) 
-        // {
-        //     try {
-        //         // createStaemet 객체 생성
-        //         std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
-        //         // 쿼리를 실행
-        //         sql::ResultSet *res = stmnt->executeQuery("select * from KING");
-        //         // 반복문을 통해서 내부의 값을 반환
-        //         while (res->next()) {
-        //             std::cout << "SNB = " << res->getString(1);
-        //             std::cout << ",Library = " << res->getString(2);
-        //             std::cout << ",dataroom = "<< res->getString(3);
-        //             std::cout << ",Registration_number = "<< res->getString(4);
-        //             std::cout << ",name = "<< res->getString(5);
-        //             std::cout << ",Author = "<< res->getString(6);
-        //             std::cout << ",publisher = "<< res->getString(7);
-        //             std::cout << ",Publication_year = "<< res->getString(8);
-        //             std::cout << ",Call_number = "<< res->getString(9);
-        //             std::cout << ",Data_base_date = "<< res->getString(10);
-        //             break;
-        //         }
-        //     // 실패시 오류 메세지 반환
-        //     } catch(sql::SQLException& e){
-        //         std::cerr << "Error selecting tasks: " << e.what() << std::endl;
-        //     }
-        // }
         int rating(std::unique_ptr<sql::Connection> &conn,std::string id) 
         {
             try {
@@ -428,7 +381,6 @@ class database
                 std::cerr << "Error selecting tasks: " << e.what() << std::endl;
             }
         }
-        //대여함수
         void borrowBook(std::unique_ptr<sql::Connection> &conn, std::string id, std::string book) {
             try {
                 std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
@@ -439,7 +391,6 @@ class database
                 std::cerr << "Error selecting tasks: " << e.what() << std::endl;
             }
         }
-        //대여함수
         bool borrowcheck(std::unique_ptr<sql::Connection> &conn, std::string book) {
             try {
                 std::unique_ptr<sql::Statement> stmnt(conn->createStatement());
@@ -455,7 +406,6 @@ class database
                 return 0;
             }
         }
-        //반납함수
         int returnBook(std::unique_ptr<sql::Connection> &conn, std::string id, std::string book) 
         {
             try {
@@ -789,19 +739,14 @@ class server
 };
 int main(int argc, char *argv[])
 {
-     // DB연결 객체 생성
     sql::Driver* driver = sql::mariadb::get_driver_instance();
-    // 연결할 DB의 특정 IP, DB를 정의
     sql::SQLString url("jdbc:mariadb://localhost:3306/KINGSEO");
-    // 연결할 DB를 사용할 유저를 정의
     sql::Properties properties({{"user", "PMJ"}, {"password", "1234"}});
-    // 객체에 값을 통하여 연결을 시도
     std::unique_ptr<sql::Connection> conn(driver->connect(url, properties));
     server pmj;
     database dbpmj;
     pmj.create_socket(&argc,argv);
     pmj.login(conn,dbpmj);
-    
     pmj.socket_close();
     return 0;
 }
